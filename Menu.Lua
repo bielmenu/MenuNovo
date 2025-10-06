@@ -299,9 +299,9 @@ RunService.RenderStepped:Connect(function(deltaTime)
 		FOVCircle.Position = isMobile and center or (UserInputService:GetMouseLocation() - Vector2.new(0, 36))
 
 
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player ~= player and player.Character and player.Character:FindFirstChild("Head") then
-				local head = player.Character.Head
+		for _, playerH in ipairs(Players:GetPlayers()) do
+			if playerH ~= player and playerH.Character and playerH.Character:FindFirstChild("Head") then
+				local head = playerH.Character.Head
 
 				if Ativado then
 					if not head:FindFirstChild("AimbotMod") then
