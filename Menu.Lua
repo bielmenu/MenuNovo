@@ -163,28 +163,6 @@ function Fly(val)
 	end
 end
 
-local aguardando, processados = {}, {}
-
-local function verificarMorte(entidade)
-	if not entidade or processados[entidade] then return end
-
-	local hum = entidade:FindFirstChildOfClass("Humanoid")
-	if hum and hum.Health <= 0 then
-		local creator = hum:FindFirstChild("creator")
-		if creator and creator.Value == game.Players.player then
-			processados[entidade] = true
-			table.insert(aguardando, entidade)
-		end
-	end
-end
-
-function SendCommand(command)
-	local remot = game:GetService("ReplicatedStorage"):WaitForChild("RemoteNovos"):WaitForChild("bixobrabo")
-	remot:FireServer(command)
-	return "GG"
-end
-
-
 RunService.RenderStepped:Connect(function(deltaTime)
 	if env.Settings.FlyEnabled == true then
 		local moveDirection = humanoid.MoveDirection
@@ -219,21 +197,6 @@ RunService.RenderStepped:Connect(function(deltaTime)
 	
 	if env.Settings.TPEnabled == true then
 		
-		for _, p in ipairs(Players:GetPlayers()) do
-			if p ~= player and p.Character then
-				verificarMorte(p.Character)
-			end
-		end
-
-		if #aguardando > 0 then
-			local alvo = table.remove(aguardando, 1)
-			local char = player.Character
-			local root = char and char:FindFirstChild("HumanoidRootPart")
-
-			char:MoveTo(alvo.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0))
-			task.wait(0.2)
-			SendCommand("/revistar")
-		end
 	end
 	
 end)
