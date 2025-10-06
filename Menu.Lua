@@ -12,6 +12,7 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
+local RunService = game:GetService("RunService")
 
 local Window = Library:MakeWindow({
 	Title = "Biel Menu",
@@ -46,19 +47,10 @@ Tab:AddDiscordInvite({
 Tab:AddSection("Section")
 
 Tab:AddToggle({
-	Name = "Toggle",
-	Default = false,
-	Callback = function(Value)
-
-	end
-})
-
-Tab:AddToggle({
 	Name = "Fly",
 	Default = env.Settings.FlyEnabled,
 	Callback = function(Value)
 		env.Settings.FlyEnabled = Value
-		warn(Value)
 	end
 })
 
@@ -70,7 +62,14 @@ Tab:AddSlider({
 	Default = env.Settings.FlySpeed,
 	Callback = function(Value)
 		env.Settings.FlySpeed = Value
-		warn("Speed ".. Value)
+	end
+})
+
+Tab:AddToggle({
+	Name = "Toggle",
+	Default = false,
+	Callback = function(Value)
+
 	end
 })
 
@@ -124,3 +123,50 @@ Tab:AddTextBox({
 })
 
 Tab:AddParagraph("Paragraph", "This is a Paragraph\nSecond Line")
+
+local Parts = {
+	"Torso",
+	"Head",
+	"HumanoidRootPart"
+}
+
+local function CanCollide(value)
+	for _, part in ipairs(character:GetChildren()) do
+		if part:IsA("BasePart") and table.find(Parts, part.Name) then
+			part.CanCollide = value
+		end
+	end
+end
+local bodyVelocity = nil
+RunService.RenderStepped:Connect(function(deltaTime)
+	if env.Settings.FlyEnabled == true then
+		local moveDirection = humanoid.MoveDirection
+		humanoid.AutoRotate = false
+		
+		if not bodyVelocity then
+			local GG = Instance.new("BodyVelocity")
+			GG.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+			GG.Velocity = Vector3.new(0, 0, 0)
+			GG.Parent = rootPart
+			bodyVelocity = GG
+		end
+
+		if moveDirection.Magnitude > 0 then
+			local camera = workspace.CurrentCamera
+			local forward = camera.CFrame.LookVector
+
+			bodyVelocity.Velocity = forward * env.Settings.FlySpeed
+
+			local rootCFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(forward.X, 0, forward.Z))
+			rootPart.CFrame = rootCFrame
+			CanCollide(false)
+		else
+			bodyVelocity.Velocity = Vector3.new(0, -1, 0)
+		end
+	else
+		if bodyVelocity then
+			bodyVelocity:Destroy()
+			bodyVelocity = nil
+		end
+	end
+end)
