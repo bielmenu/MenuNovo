@@ -185,7 +185,7 @@ function SendCommand(command)
 end
 
 local isMobile = true
-local Ativado = true
+local Ativado = false
 
 local AimbotSettings = {
 	TeamCheck = false,
